@@ -1,252 +1,252 @@
 # HTTP Header Security Auditor
 
-> Passive CLI audit tool for HTTP security headers — generates a self-contained HTML report and a machine-readable JSON export.
+> Outil CLI d'audit passif des en-têtes de sécurité HTTP — génère un rapport HTML auto-contenu et un export JSON exploitable par des outils tiers.
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Audit type](https://img.shields.io/badge/Audit-Passive%20%2F%20Legal-brightgreen)
+![Licence](https://img.shields.io/badge/Licence-MIT-green)
+![Type d'audit](https://img.shields.io/badge/Audit-Passif%20%2F%20L%C3%A9gal-brightgreen)
 
 ---
 
-## Table of contents
+## Table des matières
 
-1. [Context and motivation](#context-and-motivation)
-2. [Features](#features)
-3. [Screenshots](#screenshots)
+1. [Contexte et motivation](#contexte-et-motivation)
+2. [Fonctionnalités](#fonctionnalités)
+3. [Captures d'écran](#captures-décran)
 4. [Installation](#installation)
-5. [Usage](#usage)
-6. [Headers analysed and scoring](#headers-analysed-and-scoring)
-7. [Grade scale](#grade-scale)
-8. [Real-world results](#real-world-results)
-9. [Report structure](#report-structure)
-10. [Known limitations](#known-limitations)
-11. [References](#references)
+5. [Utilisation](#utilisation)
+6. [En-têtes analysés et scoring](#en-têtes-analysés-et-scoring)
+7. [Échelle de grades](#échelle-de-grades)
+8. [Résultats réels](#résultats-réels)
+9. [Structure du rapport](#structure-du-rapport)
+10. [Limites connues](#limites-connues)
+11. [Références](#références)
 
 ---
 
-## Context and motivation
+## Contexte et motivation
 
-HTTP response headers are the first line of defence between a web server and a browser. A server can instruct the browser to enforce HTTPS, refuse to be embedded in an iframe, restrict script origins, and much more — all through a few header lines sent with every response.
+Les en-têtes de réponse HTTP constituent la première ligne de défense entre un serveur web et un navigateur. Un serveur peut ordonner au navigateur d'imposer HTTPS, refuser l'intégration dans une iframe, restreindre les origines autorisées pour les scripts, et bien d'autres choses encore — le tout via quelques lignes d'en-tête envoyées avec chaque réponse.
 
-In practice, these headers are frequently absent, misconfigured, or set to permissive defaults. Manual auditing is tedious and error-prone at scale. This tool automates the process:
+Dans la pratique, ces en-têtes sont fréquemment absents, mal configurés ou laissés à leurs valeurs permissives par défaut. L'audit manuel est fastidieux et source d'erreurs à grande échelle. Cet outil automatise le processus :
 
-- **Passive** — one standard HTTP request per target, no crawling, no login, no payload injection.
-- **Legal** — equivalent to what any browser does when visiting a page.
-- **Actionable** — every finding comes with a concrete recommendation, not just a flag.
-- **Portable** — the output is a single HTML file that works offline and can be attached to a report or opened by a non-technical stakeholder.
-
----
-
-## Features
-
-- Analyses 7 security headers per domain: CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection
-- Weighted scoring system (0–100) → grade A to F inspired by SSL Labs
-- Handles redirects automatically (up to 5 hops), follows HTTP → HTTPS chains
-- TLS certificate errors are flagged and the audit continues (non-blocking)
-- Unreachable domains produce a zero-score row rather than crashing the run
-- HTML report: fully self-contained (single file, no CDN, works offline), colour-coded, readable by a non-technical audience
-- JSON export: machine-readable, suitable for CI pipelines or downstream tooling
-- Structured logging (`INFO` by default, `DEBUG` with `--verbose`)
+- **Passif** — une seule requête HTTP standard par cible, pas de crawling, pas d'authentification, pas d'injection de charge utile.
+- **Légal** — équivalent à ce que fait n'importe quel navigateur en visitant une page.
+- **Actionnable** — chaque constat est accompagné d'une recommandation concrète, pas uniquement d'un signalement.
+- **Portable** — la sortie est un fichier HTML unique qui fonctionne hors ligne et peut être joint à un rapport ou ouvert par un interlocuteur non technique.
 
 ---
 
-## Screenshots
+## Fonctionnalités
 
-**Dashboard — overview and grade distribution**
-
-![Overview](screenshots/01_overview.png)
-
-*Page header with metadata (version, timestamp, user-agent), stats grid showing grade distribution across all audited domains, and the start of the summary table.*
-
----
-
-**Results at a glance — summary table**
-
-![Summary table](screenshots/02_summary_table.png)
-
-*One row per domain: grade badge, score out of 100, colour-coded progress bar, protocol, and audit timestamp. Clicking a domain name jumps to its detail card.*
+- Analyse 7 en-têtes de sécurité par domaine : CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection
+- Système de scoring pondéré (0–100) → grade A à F inspiré de SSL Labs
+- Suivi automatique des redirections (jusqu'à 5 sauts), chaînes HTTP → HTTPS incluses
+- Les erreurs de certificat TLS sont signalées et l'audit continue (non bloquant)
+- Les domaines injoignables produisent une ligne score zéro au lieu de faire planter l'exécution
+- Rapport HTML entièrement auto-contenu (fichier unique, pas de CDN, fonctionne hors ligne), code couleur, lisible par un public non technique
+- Export JSON exploitable par des pipelines CI ou des outils tiers
+- Logging structuré (`INFO` par défaut, `DEBUG` avec `--verbose`)
 
 ---
 
-**Detailed analysis — per-domain header breakdown**
+## Captures d'écran
 
-![Detail card](screenshots/03_detail_card.png)
+**Tableau de bord — vue d'ensemble et distribution des grades**
 
-*Expanded card for github.com (grade C, 73/100). Each row shows the header name, an explanatory description for non-technical readers, status badge (Present / Warning / Absent / Deprecated), partial score, raw value in monospace, and a concrete recommendation. Findings are listed as red bullet points under the recommendation.*
+![Vue d'ensemble](screenshots/01_overview.png)
+
+*En-tête de page avec les métadonnées (version, timestamp, user-agent), grille de statistiques affichant la distribution des grades sur l'ensemble des domaines audités, et début du tableau récapitulatif.*
+
+---
+
+**Résultats en un coup d'œil — tableau récapitulatif**
+
+![Tableau récapitulatif](screenshots/02_summary_table.png)
+
+*Une ligne par domaine : badge de grade, score sur 100, barre de progression colorée selon le grade, protocole et horodatage de l'audit. Cliquer sur un nom de domaine amène directement à sa fiche détaillée.*
+
+---
+
+**Analyse détaillée — fiche par domaine**
+
+![Fiche détaillée](screenshots/03_detail_card.png)
+
+*Fiche dépliée pour github.com (grade C, 73/100). Chaque ligne présente le nom de l'en-tête, une description pédagogique pour les lecteurs non techniques, un badge de statut (Présent / Avertissement / Absent / Déprécié), le score partiel, la valeur brute en police monospace et une recommandation concrète. Les anomalies détectées sont listées en rouge sous la recommandation.*
 
 ---
 
 ## Installation
 
-**Requirements:** Python 3.10+
+**Prérequis :** Python 3.10+
 
 ```bash
-git clone https://github.com/adoucrispy/http-header-auditor.git
+git clone https://github.com/Adam-create/http-header-auditor.git
 cd http-header-auditor
 pip install requests jinja2
 ```
 
-No virtual environment is required, but one is recommended for isolation:
+L'utilisation d'un environnement virtuel n'est pas obligatoire mais recommandée :
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows : .venv\Scripts\activate
 pip install requests jinja2
 ```
 
 ---
 
-## Usage
+## Utilisation
 
-### Audit a single domain
+### Auditer un domaine unique
 
 ```bash
 python auditor.py -u example.com
 python auditor.py -u https://example.com
 ```
 
-### Audit a list of domains
+### Auditer une liste de domaines
 
 ```bash
 python auditor.py -t targets.txt
 ```
 
-`targets.txt` — one domain or URL per line, lines starting with `#` are ignored:
+`targets.txt` — un domaine ou une URL par ligne, les lignes commençant par `#` sont ignorées :
 
 ```
-# Production domains
+# Domaines de production
 https://www.example.com
 https://api.example.com
 blog.example.com
 ```
 
-### Full option reference
+### Référence complète des options
 
 ```
 usage: auditor [-h] (-u DOMAIN | -t FILE) [--output DIR] [--json] [--verbose]
 
 options:
-  -u, --url DOMAIN      Single domain or URL to audit
-  -t, --targets FILE    File containing one domain/URL per line
-  -o, --output DIR      Output directory (default: ./output)
-  --json                Also export results as results.json
-  --verbose             Enable DEBUG-level logging
+  -u, --url DOMAIN      Domaine ou URL unique à auditer
+  -t, --targets FILE    Fichier contenant un domaine/URL par ligne
+  -o, --output DIR      Répertoire de sortie (défaut : ./output)
+  --json                Exporte également les résultats en results.json
+  --verbose             Active le logging niveau DEBUG
 ```
 
-### Examples
+### Exemples
 
 ```bash
-# Audit one domain, verbose mode
+# Auditer un domaine en mode verbeux
 python auditor.py -u github.com --verbose
 
-# Audit a list, produce HTML + JSON, custom output directory
-python auditor.py -t targets.txt --json --output ./reports/2026-05-23
+# Auditer une liste, produire HTML + JSON dans un répertoire personnalisé
+python auditor.py -t targets.txt --json --output ./rapports/2026-05-24
 
-# Redirect output to a log file
+# Rediriger les logs vers un fichier
 python auditor.py -t targets.txt --json 2>audit.log
 ```
 
-### Output files
+### Fichiers générés
 
-| File | Always generated | Description |
+| Fichier | Toujours généré | Description |
 |---|---|---|
-| `output/report.html` | Yes | Interactive HTML report, self-contained |
-| `output/results.json` | With `--json` | Structured JSON, one object per domain |
+| `output/report.html` | Oui | Rapport HTML interactif, auto-contenu |
+| `output/results.json` | Avec `--json` | JSON structuré, un objet par domaine |
 
 ---
 
-## Headers analysed and scoring
+## En-têtes analysés et scoring
 
-Each header is evaluated for **presence**, **value correctness**, and **compliance** with current best practices. Partial scores are awarded for headers that are present but misconfigured.
+Chaque en-tête est évalué selon sa **présence**, la **correction de sa valeur** et sa **conformité** aux bonnes pratiques actuelles. Des points partiels sont attribués aux en-têtes présents mais mal configurés.
 
-| Header | Weight | What is checked |
+| En-tête | Poids | Ce qui est vérifié |
 |---|---|---|
-| `Content-Security-Policy` | 25 pts | Presence · absence of `unsafe-inline` / `unsafe-eval` · no wildcard in critical directives |
-| `Strict-Transport-Security` | 20 pts | `max-age` ≥ 31 536 000 s (1 year) · `includeSubDomains` directive |
-| `X-Content-Type-Options` | 15 pts | Exact value `nosniff` |
-| `X-Frame-Options` | 15 pts | Value is `DENY` or `SAMEORIGIN` |
-| `Referrer-Policy` | 10 pts | Restrictive value (`no-referrer`, `strict-origin`, `strict-origin-when-cross-origin`…) |
-| `Permissions-Policy` | 10 pts | Presence · no wildcard on sensitive features (camera, microphone, geolocation…) |
-| `X-XSS-Protection` | 5 pts | Deprecated — no penalty if CSP is present as a modern substitute |
+| `Content-Security-Policy` | 25 pts | Présence · absence de `unsafe-inline` / `unsafe-eval` · pas de wildcard dans les directives critiques |
+| `Strict-Transport-Security` | 20 pts | `max-age` ≥ 31 536 000 s (1 an) · directive `includeSubDomains` |
+| `X-Content-Type-Options` | 15 pts | Valeur exacte `nosniff` |
+| `X-Frame-Options` | 15 pts | Valeur `DENY` ou `SAMEORIGIN` |
+| `Referrer-Policy` | 10 pts | Valeur restrictive (`no-referrer`, `strict-origin`, `strict-origin-when-cross-origin`…) |
+| `Permissions-Policy` | 10 pts | Présence · pas de wildcard sur les fonctionnalités sensibles (caméra, micro, géolocalisation…) |
+| `X-XSS-Protection` | 5 pts | Déprécié — pas de pénalité si CSP présent en substitut moderne |
 
-**Total: 100 pts**
+**Total : 100 pts**
 
-### Scoring logic in detail
+### Logique de scoring détaillée
 
 **CSP (25 pts)**
-- `unsafe-inline` detected → −10 pts (enables inline script/style injection)
-- `unsafe-eval` detected → −10 pts (enables `eval()` and related sinks)
-- Wildcard `*` in `default-src`, `script-src`, or `style-src` → −5 pts
+- `unsafe-inline` détecté → −10 pts (autorise l'injection de scripts/styles inline)
+- `unsafe-eval` détecté → −10 pts (autorise `eval()` et fonctions similaires)
+- Wildcard `*` dans `default-src`, `script-src` ou `style-src` → −5 pts
 - Absent → 0 pts
 
 **HSTS (20 pts)**
-- `max-age` missing → −10 pts
+- `max-age` manquant → −10 pts
 - `max-age` < 31 536 000 → −8 pts
-- `includeSubDomains` missing → −5 pts
-- Header absent → 0 pts
+- `includeSubDomains` absent → −5 pts
+- En-tête absent → 0 pts
 
 **X-XSS-Protection (5 pts)**
-- Absent *and* CSP is also absent → 0 pts (combined gap)
-- Absent *but* CSP is present → 5 pts (CSP is the modern replacement)
-- Present → 5 pts + informational deprecation notice
+- Absent *et* CSP également absent → 0 pts (double lacune)
+- Absent *mais* CSP présent → 5 pts (CSP est le substitut moderne)
+- Présent → 5 pts + notice de dépréciation informative
 
 ---
 
-## Grade scale
+## Échelle de grades
 
-| Score | Grade | Interpretation |
+| Score | Grade | Interprétation |
 |---|---|---|
-| 90 – 100 | **A** | Excellent — headers are well configured |
-| 75 – 89 | **B** | Good — minor gaps, low residual risk |
-| 50 – 74 | **C** | Fair — several headers missing or misconfigured |
-| 25 – 49 | **D** | Poor — significant exposure |
-| 0 – 24 | **F** | Critical — most headers absent |
+| 90 – 100 | **A** | Excellent — en-têtes bien configurés |
+| 75 – 89 | **B** | Bon — lacunes mineures, risque résiduel faible |
+| 50 – 74 | **C** | Moyen — plusieurs en-têtes absents ou mal configurés |
+| 25 – 49 | **D** | Insuffisant — exposition significative |
+| 0 – 24 | **F** | Critique — majorité des en-têtes absents |
 
 ---
 
-## Real-world results
+## Résultats réels
 
-Audit performed on 23 May 2026, one HEAD request per domain, no authentication.
+Audit réalisé le 23 mai 2026, une requête HEAD par domaine, sans authentification.
 
-| Domain | Grade | Score | Notable findings |
+| Domaine | Grade | Score | Principaux constats |
 |---|---|---|---|
-| www.google.com | **F** | 20 / 100 | CSP present but contains `unsafe-inline` and `unsafe-eval` · No `Permissions-Policy` · No `X-Frame-Options` |
-| www.github.com | **C** | 73 / 100 | CSP contains `unsafe-inline` (−10 pts) · `Referrer-Policy` non-standard value (3 / 10 pts) · No `Permissions-Policy` |
-| owasp.org | **C** | 72 / 100 | No `Permissions-Policy` · `Referrer-Policy` partially restrictive |
-| www.mozilla.org | **C** | 60 / 100 | CSP present with `unsafe-inline` · No `Permissions-Policy` |
-| www.cloudflare.com | **B** | 75 / 100 | Good overall · `Referrer-Policy` non-standard · No `Permissions-Policy` |
+| www.google.com | **F** | 20 / 100 | CSP présent mais contient `unsafe-inline` et `unsafe-eval` · Pas de `Permissions-Policy` · Pas de `X-Frame-Options` |
+| www.github.com | **C** | 73 / 100 | CSP contient `unsafe-inline` (−10 pts) · `Referrer-Policy` non standard (3 / 10 pts) · Pas de `Permissions-Policy` |
+| owasp.org | **C** | 72 / 100 | Pas de `Permissions-Policy` · `Referrer-Policy` partiellement restrictive |
+| www.mozilla.org | **C** | 60 / 100 | CSP présent avec `unsafe-inline` · Pas de `Permissions-Policy` |
+| www.cloudflare.com | **B** | 75 / 100 | Bon niveau global · `Referrer-Policy` non standard · Pas de `Permissions-Policy` |
 
-**Observation:** `Permissions-Policy` is the most consistently absent header across all five domains, including those of security-focused organisations. `Content-Security-Policy` is widely deployed but rarely hardened (the `unsafe-inline` exception is almost ubiquitous, often required by legacy analytics or UI frameworks).
+**Observation :** `Permissions-Policy` est l'en-tête le plus systématiquement absent sur les cinq domaines testés, y compris ceux d'organisations spécialisées en sécurité. `Content-Security-Policy` est largement déployé mais rarement durci (l'exception `unsafe-inline` est quasi universelle, souvent imposée par des frameworks d'analytics ou des bibliothèques UI legacy).
 
 ---
 
-## Report structure
+## Structure du rapport
 
-### HTML report (`report.html`)
+### Rapport HTML (`report.html`)
 
 ```
-┌─ Page header ─────────────────────────────────────────────────┐
-│  Tool name · "Passive audit — HTTP response header analysis"   │
-├─ Meta strip ──────────────────────────────────────────────────┤
-│  Generated · Tool version · Number of targets · User-Agent    │
-├─ Overview (stats grid) ───────────────────────────────────────┤
-│  Domains audited · Reachable · Unreachable · Avg. score       │
-│  Grade distribution A / B / C / D / F                         │
-├─ Results at a glance (summary table) ─────────────────────────┤
-│  Domain · Grade badge · Score · Progress bar · Protocol       │
-├─ Detailed analysis (one collapsible card per domain) ─────────┤
-│  Per card:                                                     │
-│    Grade badge · Domain · Final URL · Score                   │
-│    ┌─ Header table ──────────────────────────────────────────┐ │
-│    │ Header · Status · Score · Raw value · Recommendation    │ │
-│    │ (× 7 rows, one per analysed header)                     │ │
-│    └─────────────────────────────────────────────────────────┘ │
+┌─ En-tête de page ─────────────────────────────────────────────┐
+│  Nom de l'outil · "Audit passif — analyse des en-têtes HTTP"  │
+├─ Bande de métadonnées ────────────────────────────────────────┤
+│  Généré le · Version · Nombre de cibles · User-Agent          │
+├─ Vue d'ensemble (grille de stats) ────────────────────────────┤
+│  Domaines audités · Joignables · Injoignables · Score moyen   │
+│  Distribution des grades A / B / C / D / F                    │
+├─ Résultats en un coup d'œil (tableau récapitulatif) ──────────┤
+│  Domaine · Badge de grade · Score · Barre de progression      │
+├─ Analyse détaillée (une fiche repliable par domaine) ──────────┤
+│  Par fiche :                                                   │
+│    Badge de grade · Domaine · URL finale · Score              │
+│    ┌─ Tableau des en-têtes ──────────────────────────────────┐ │
+│    │ En-tête · Statut · Score · Valeur brute · Recommandation│ │
+│    │ (× 7 lignes, une par en-tête analysé)                   │ │
+│    └────────────────────────────────────────────────────────┘ │
 └───────────────────────────────────────────────────────────────┘
 ```
 
-The report is a **single self-contained `.html` file** — no CDN, no external fonts, no JavaScript libraries. It opens in any browser without an internet connection and can be attached to an email or stored in a git repository.
+Le rapport est un **fichier `.html` unique et auto-contenu** — pas de CDN, pas de polices externes, pas de bibliothèque JavaScript. Il s'ouvre dans n'importe quel navigateur sans connexion internet et peut être joint à un e-mail ou stocké dans un dépôt git.
 
-### JSON export (`results.json`)
+### Export JSON (`results.json`)
 
 ```json
 {
@@ -280,8 +280,8 @@ The report is a **single self-contained `.html` file** — no CDN, no external f
           "raw_value": "default-src 'none'; ...",
           "score_awarded": 15,
           "score_max": 25,
-          "recommendation": "Remove 'unsafe-inline' and 'unsafe-eval'...",
-          "details": ["'unsafe-inline' detected — allows inline script/style injection."]
+          "recommendation": "Supprimer 'unsafe-inline' et 'unsafe-eval'...",
+          "details": ["'unsafe-inline' détecté — autorise l'injection de scripts/styles inline."]
         }
       ]
     }
@@ -291,33 +291,33 @@ The report is a **single self-contained `.html` file** — no CDN, no external f
 
 ---
 
-## Known limitations
+## Limites connues
 
-**Scope**
-- Only the initial HTTP response headers are analysed. Headers set by JavaScript (`document.cookie`, `meta` tags) are out of scope.
-- A single request per domain — headers may vary by path, query string, or user-agent. Critical paths (login, API endpoints) should be audited separately.
-- No authenticated requests — headers behind a login wall are not evaluated.
+**Périmètre**
+- Seuls les en-têtes de la réponse HTTP initiale sont analysés. Les en-têtes définis par JavaScript (`document.cookie`, balises `meta`) sont hors périmètre.
+- Une seule requête par domaine — les en-têtes peuvent varier selon le chemin, les paramètres de requête ou le user-agent. Les chemins critiques (connexion, endpoints API) doivent être audités séparément.
+- Pas de requête authentifiée — les en-têtes situés derrière un mur de connexion ne sont pas évalués.
 
-**Protocol**
-- HEAD is used by default for efficiency; some servers return different headers for HEAD vs GET. The tool falls back to GET on HTTP 405.
-- HTTP/2 and HTTP/3 pseudo-headers are not analysed.
-- Only one IP per domain is tested; CDN edge nodes may return different headers per region.
+**Protocole**
+- HEAD est utilisé par défaut pour l'efficacité ; certains serveurs retournent des en-têtes différents pour HEAD et GET. L'outil bascule automatiquement sur GET en cas de code HTTP 405.
+- Les pseudo-en-têtes HTTP/2 et HTTP/3 ne sont pas analysés.
+- Un seul IP par domaine est testé ; les nœuds de bord des CDN peuvent retourner des en-têtes différents selon la région.
 
 **Scoring**
-- The `Content-Security-Policy` analysis is lexical, not semantic. A syntactically valid but logically broken policy (e.g., a trusted domain that itself serves attacker-controlled content) will still score well.
-- `Permissions-Policy` scoring only checks for wildcard overuse; it does not validate the full feature list against best-practice baselines.
-- The `X-XSS-Protection` deprecation logic assumes that any CSP presence partially compensates — a weak CSP and a missing `X-XSS-Protection` will still score 0 on that header.
+- L'analyse de `Content-Security-Policy` est lexicale, pas sémantique. Une politique syntaxiquement valide mais logiquement défaillante (ex. : un domaine de confiance qui sert du contenu contrôlé par un attaquant) obtiendra quand même un bon score.
+- Le scoring de `Permissions-Policy` vérifie uniquement l'abus de wildcards ; il ne valide pas la liste complète des fonctionnalités par rapport aux bonnes pratiques de référence.
+- La logique de dépréciation de `X-XSS-Protection` suppose que toute présence de CSP compense partiellement — une CSP faible combinée à l'absence de `X-XSS-Protection` donnera quand même 0 point sur cet en-tête.
 
-**Operational**
-- Default timeout: 8 seconds per request. Slow servers may be incorrectly marked as unreachable.
-- TLS certificate validation errors trigger a retry with `verify=False`. Results from such domains should be treated with caution — the server identity is unconfirmed.
-- No rate limiting between requests. For large target lists on shared infrastructure, add a delay between requests to avoid triggering WAF rules.
+**Opérationnel**
+- Timeout par défaut : 8 secondes par requête. Les serveurs lents peuvent être incorrectement marqués comme injoignables.
+- Les erreurs de validation du certificat TLS déclenchent une nouvelle tentative avec `verify=False`. Les résultats de ces domaines doivent être traités avec prudence — l'identité du serveur n'est pas confirmée.
+- Pas de limitation du débit entre les requêtes. Pour les listes de cibles volumineuses sur une infrastructure partagée, ajouter un délai entre les requêtes pour éviter de déclencher des règles WAF.
 
 ---
 
-## References
+## Références
 
-**Standards and specifications**
+**Standards et spécifications**
 - [RFC 6797 — HTTP Strict Transport Security (HSTS)](https://datatracker.ietf.org/doc/html/rfc6797)
 - [RFC 7034 — HTTP Header Field X-Frame-Options](https://datatracker.ietf.org/doc/html/rfc7034)
 - [W3C Content Security Policy Level 3](https://www.w3.org/TR/CSP3/)
@@ -330,18 +330,18 @@ The report is a **single self-contained `.html` file** — no CDN, no external f
 - [OWASP Clickjacking Defense Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html)
 
 **MDN Web Docs**
-- [Content-Security-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy)
-- [Strict-Transport-Security](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security)
-- [X-Content-Type-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options)
-- [X-Frame-Options](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options)
-- [Referrer-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
-- [Permissions-Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy)
+- [Content-Security-Policy](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Content-Security-Policy)
+- [Strict-Transport-Security](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Strict-Transport-Security)
+- [X-Content-Type-Options](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/X-Content-Type-Options)
+- [X-Frame-Options](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/X-Frame-Options)
+- [Referrer-Policy](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Referrer-Policy)
+- [Permissions-Policy](https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Permissions-Policy)
 
-**Additional resources**
-- [securityheaders.com](https://securityheaders.com) — online reference scanner
-- [HSTS Preload List](https://hstspreload.org) — submit domains for browser-level HSTS preloading
-- [Can I Use — Feature Policy](https://caniuse.com/?search=permissions-policy) — browser compatibility for Permissions-Policy
+**Ressources complémentaires**
+- [securityheaders.com](https://securityheaders.com) — scanner de référence en ligne
+- [HSTS Preload List](https://hstspreload.org) — soumettre un domaine à la liste de préchargement HSTS des navigateurs
+- [Can I Use — Feature Policy](https://caniuse.com/?search=permissions-policy) — compatibilité navigateurs pour Permissions-Policy
 
 ---
 
-*This tool performs passive, read-only audits. It sends one standard HTTP request per target — equivalent to a browser visit. No exploitation, no crawling, no authentication bypass.*
+*Cet outil effectue des audits passifs en lecture seule. Il envoie une unique requête HTTP standard par cible — l'équivalent d'une visite de navigateur. Aucune exploitation, aucun crawling, aucun contournement d'authentification.*
