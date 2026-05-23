@@ -1,0 +1,9 @@
+# HTTP Header Security Auditor — target list
+# One domain or URL per line. Lines starting with # are ignored.
+# Both bare domains and full URLs are accepted.
+
+https://www.google.com
+https://www.github.com
+https://www.mozilla.org
+https://owasp.org
+https://www.cloudflare.com
