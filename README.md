@@ -12,14 +12,15 @@
 
 1. [Context and motivation](#context-and-motivation)
 2. [Features](#features)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [Headers analysed and scoring](#headers-analysed-and-scoring)
-6. [Grade scale](#grade-scale)
-7. [Real-world results](#real-world-results)
-8. [Report structure](#report-structure)
-9. [Known limitations](#known-limitations)
-10. [References](#references)
+3. [Screenshots](#screenshots)
+4. [Installation](#installation)
+5. [Usage](#usage)
+6. [Headers analysed and scoring](#headers-analysed-and-scoring)
+7. [Grade scale](#grade-scale)
+8. [Real-world results](#real-world-results)
+9. [Report structure](#report-structure)
+10. [Known limitations](#known-limitations)
+11. [References](#references)
 
 ---
 
@@ -46,6 +47,32 @@ In practice, these headers are frequently absent, misconfigured, or set to permi
 - HTML report: fully self-contained (single file, no CDN, works offline), colour-coded, readable by a non-technical audience
 - JSON export: machine-readable, suitable for CI pipelines or downstream tooling
 - Structured logging (`INFO` by default, `DEBUG` with `--verbose`)
+
+---
+
+## Screenshots
+
+**Dashboard — overview and grade distribution**
+
+![Overview](screenshots/01_overview.png)
+
+*Page header with metadata (version, timestamp, user-agent), stats grid showing grade distribution across all audited domains, and the start of the summary table.*
+
+---
+
+**Results at a glance — summary table**
+
+![Summary table](screenshots/02_summary_table.png)
+
+*One row per domain: grade badge, score out of 100, colour-coded progress bar, protocol, and audit timestamp. Clicking a domain name jumps to its detail card.*
+
+---
+
+**Detailed analysis — per-domain header breakdown**
+
+![Detail card](screenshots/03_detail_card.png)
+
+*Expanded card for github.com (grade C, 73/100). Each row shows the header name, an explanatory description for non-technical readers, status badge (Present / Warning / Absent / Deprecated), partial score, raw value in monospace, and a concrete recommendation. Findings are listed as red bullet points under the recommendation.*
 
 ---
 
